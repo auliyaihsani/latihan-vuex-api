@@ -1,6 +1,9 @@
 <template>
   <div>
   <h3>haii Todos ini vue js</h3>
+  <h2>procesing: {{ getProsesTodo }} </h2>
+    <sani-load :active.sync="getProsesTodo"       
+        :is-full-page="true"></sani-load>
   <div class="legend">
     <span>double click to mark as complite</span>
     <span>
@@ -26,6 +29,7 @@ import { mapGetters, mapActions } from "vuex";
 
 
 export default {
+ 
     name: "Todos",
     methods: {
       ...mapActions(['fetchTodos', 'deleteTodo', 'updateTodo']),
@@ -39,7 +43,7 @@ export default {
         this.updateTodo(updTodo);
       }
     },
-    computed: mapGetters(['allTodos']), 
+    computed: mapGetters(['allTodos','getProsesTodo']), 
     created() {
       this.fetchTodos();
     }

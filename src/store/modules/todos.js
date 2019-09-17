@@ -2,21 +2,45 @@ import axios from "axios";
 // import { stat } from "fs";
 
 const state = {
-    todos: []
+    todos: [],
+    ProcessTodo: false
 };
 
 const getters = {
-    allTodos: state => state.todos
+    allTodos: state => state.todos,
+    getProsesTodo: state =>state.ProcessTodo 
 
+};
+
+const  mutations = {
+    setTodos: (state, todos)=>(state.todos = todos),
+    newTodo: (state, todo) => state.todos.unshift(todo),
+    removeTodo: (state, id) => state.todos = state.todos.filter(todo => todo.id !==id),
+    updateTodo:(state, updTodo) => {
+        const index = state.todos.findIndex(todo => todo.id === updTodo.id);
+        if (index !== -1) {
+            state.todos.splice(index, 1, updTodo);
+        }
+    },
+    setProcessTodo(state, payload){
+        state.ProcessTodo = payload
+    }
 };
 
 const actions = {
    async fetchTodos ({ commit }) {
-        const response = await axios.get(
-            'https://jsonplaceholder.typicode.com/todos'
-            );   
+       
+            
+        try {
+            const response = await axios.get(
+                'https://jsonplaceholder.typicode.com/todos'
+                );
+            commit('setTodos', response.data); 
+        } catch (error) {
+            commit('opps'+ error);
+        }    
         
-        commit('setTodos', response.data); 
+        
     },
     async addTodo ({ commit }, title) {
         const response = await axios.post(
@@ -45,29 +69,24 @@ const actions = {
     },
 
     async updateTodo({ commit }, updTodo){
-        const response = await axios.put(
-            `https://jsonplaceholder.typicode.com/todos/${updTodo.id}`, updTodo 
-        );
+        commit('setProcessTodo', true)
+        // const response = await axios.put(
+        //     `https://jsonplaceholder.typicode.com/todos/${updTodo.id}`, updTodo 
+        // );
        // console.log(response.data);
-        commit('updateTodo', response.data);
+       await axios.put(`https://jsonplaceholder.typicode.com/todos/${updTodo.id}`, updTodo )
+        .then(
+            res => {
+                commit('updateTodo', res.data),
+                commit('setProcessTodo', false) 
+            });
+       
     }
 };
 
-const  mutations = {
-    setTodos: (state, todos)=>(state.todos = todos),
-    newTodo: (state, todo) => state.todos.unshift(todo),
-    removeTodo: (state, id) => state.todos = state.todos.filter(todo => todo.id !==id),
-    updateTodo:(state, updTodo) => {
-        const index = state.todos.findIndex(todo => todo.id === updTodo.id);
-        if (index !== -1) {
-            state.todos.splice(index, 1, updTodo);
-        }
-    }
-};
 
 
 export default {
-    // axios,
     state,
     getters,
     actions,
